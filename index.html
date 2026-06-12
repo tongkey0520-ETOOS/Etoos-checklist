@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ETOO독학기숙 생활담임 데일리 체크리스트</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Do+Hyeon&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap');
+        body {
+            font-family: 'Pretendard', sans-serif;
+            overflow-x: hidden;
+        }
+
+        :root{
+            --task-font-size: 15px;
+            --task-desc-size: 12px;
+            --task-font-family: 'Pretendard', sans-serif;
+            --task-font-weight: 800;
+        }
+
+        /* 스크롤바 디자인 슬림화로 한 화면 가시성 확보 */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between text-xs md:text-sm select-none">
+
+    <div id="app" class="w-full max-w-[1750px] mx-auto px-3 py-3 flex flex-col flex-1 gap-3">
+        
+        <!-- 초슬림 컴팩트 헤더 -->
+        <header class="bg-white p-3.5 rounded-xl shadow-sm border border-slate-150 flex flex-col md:flex-row items-center justify-between gap-3 shrink-0">
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2">
+                    <span class="inline-block w-2 h-6 bg-blue-600 rounded-full shrink-0"></span>
+                    <input type="text" id="main-title" class="text-lg md:text-xl font-black text-slate-900 tracking-tight bg-transparent border-b border-transparent hover:border-slate-300 focus:border-blue-500 focus:outline-none py-0.5 px-1 rounded transition-all w-full md:max-w-md font-bold" value="ETOO독학기숙 생활담임 데일리 체크리스트">
+                </div>
+                <div class="flex items-center gap-2 mt-0.5 pl-3">
+                    <input type="text" id="sub-desc" class="text-[11px] text-slate-500 bg-transparent border-b border-transparent hover:border-slate-200 focus:border-blue-400 focus:outline-none py-0.2 px-1 rounded transition-all w-full max-w-lg" value="각 반의 업무 진행 현황을 체크하고 조치사항을 실시간으로 기록하는 원스톱 데일리 업무 시트입니다.">
+                    <span id="mode-badge" class="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-600 shrink-0">
+                        연결 대기 중...
+                    </span>
+                </div>
+            </div>
+            
+            <!-- 우측 제어 영역 (날짜 선택 및 편집 토글) -->
+            <div class="flex items-center flex-wrap gap-2.5 shrink-0">
+                
+                <!-- 편집 모드 토글 스위치 -->
+                <button id="edit-mode-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 hover:border-indigo-300 bg-white hover:bg-indigo-50/50 text-slate-700 font-bold transition-all shadow-sm">
+                    <i data-lucide="edit-3" class="w-4 h-4 text-indigo-500"></i>
+                    <span id="edit-mode-text">🛠️ 설정/편집 모드</span>
+                </button>
+
+                <!-- 날짜 선택기 -->
+                <div class="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200">
+                    <button id="prev-date-btn" class="p-1.5 hover:bg-white rounded transition-all text-slate-600">
+                        <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                    </button>
+                    <input type="date" id="target-date" class="bg-transparent border-none text-center font-bold text-slate-800 focus:outline-none cursor-pointer text-xs w-[110px]">
+                    <button id="next-date-btn" class="p-1.5 hover:bg-white rounded transition-all text-slate-600">
+                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        
+        <div id="design-panel" class="hidden bg-white p-3 rounded-xl shadow-sm border border-slate-200 mb-3">
+            <div class="font-extrabold text-slate-800 mb-2">🎨 디자인 설정</div>
+            <div class="text-xs text-slate-500 mb-2">한글 전용 글꼴을 자유롭게 선택하여 실시간으로 미리보기 및 저장할 수 있습니다.</div>
+            <div class="flex flex-wrap gap-4 items-center text-sm">
+                <label>글씨 크기
+                    <input id="fontSizeRange" type="range" min="10" max="24" value="15">
+                </label>
+                <label>설명 크기
+                    <input id="descSizeRange" type="range" min="9" max="18" value="12">
+                </label>
+                <label>글꼴
+                    <select id="fontFamilySelect">
+                        <option value="'Pretendard', sans-serif">Pretendard</option>
+                        <option value="'Noto Sans KR', sans-serif">Noto Sans KR</option>
+                        <option value="'Nanum Gothic', sans-serif">나눔고딕</option>
+                        <option value="'Nanum Myeongjo', serif">나눔명조</option>
+                        <option value="'Gowun Dodum', sans-serif">고운돋움</option>
+                        <option value="'Gowun Batang', serif">고운바탕</option>
+                        <option value="'Do Hyeon', sans-serif">도현체</option>
+                        <option value="'Black Han Sans', sans-serif">블랙한산스</option>
+                        <option value="'Malgun Gothic', sans-serif">맑은 고딕</option>
+                    </select>
+                </label>
+                <button id="resetDesign" class="px-3 py-1 rounded bg-slate-100 border">기본값 복원</button>
+            </div>
+        </div>
+
+        <!-- 세로 공간 차지를 최소화하기 위한 미니 바 형태의 전역 대시보드 -->
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-3 bg-white p-2.5 rounded-xl shadow-sm border border-slate-150 shrink-0">
+            <div class="flex items-center justify-between px-3 py-1.5 bg-slate-50/70 rounded-lg border border-slate-100">
+                <span class="text-slate-500 font-bold flex items-center gap-1.5">
+                    <i data-lucide="percent" class="w-4 h-4 text-indigo-500"></i> 전체 진행률
+                </span>
+                <span id="total-progress-text" class="text-base font-black text-indigo-600">0%</span>
+            </div>
+            <div class="flex items-center justify-between px-3 py-1.5 bg-slate-50/70 rounded-lg border border-slate-100">
+                <span class="text-slate-500 font-bold flex items-center gap-1.5">
+                    <i data-lucide="clipboard-check" class="w-4 h-4 text-blue-500"></i> 완료 개수
+                </span>
+                <span id="total-completed-count" class="text-base font-black text-slate-800">0 / 16</span>
+            </div>
+            <div class="flex items-center justify-between px-3 py-1.5 bg-slate-50/70 rounded-lg border border-slate-100">
+                <span class="text-slate-500 font-bold flex items-center gap-1.5">
+                    <i data-lucide="info" class="w-4 h-4 text-emerald-500"></i> 상태 알림
+                </span>
+                <span id="status-quick-msg" class="text-[11px] font-bold text-slate-600 truncate max-w-[200px]">데이터 동기화 완료</span>
+            </div>
+        </section>
+
+        <!-- 실시간 알림 토스트 피드 -->
+        <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-1.5 pointer-events-none"></div>
+
+        <!-- PC 화면에서 한눈에 볼 수 있도록 xl이상에서 grid-cols-4로 정렬 -->
+        <main class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3.5 flex-1 min-h-0">
+            
+            <!-- SS반 -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-150 overflow-hidden flex flex-col min-h-0">
+                <div class="p-3 border-b border-slate-100 bg-gradient-to-r from-blue-50/40 to-indigo-50/5 flex justify-between items-center shrink-0">
+                    <h2 class="font-extrabold text-slate-800 text-sm flex items-center gap-1.5">
+                        <span class="w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center text-[11px] font-black">SS</span>
+                        SS반 체크리스트
+                    </h2>
+                    <span id="progress-badge-SS" class="bg-blue-50 text-blue-700 text-[10px] font-black px-2 py-0.5 rounded-full">0% 완료 (0/4)</span>
+                </div>
+                <div id="checklist-SS" class="p-2.5 flex-1 overflow-y-auto space-y-2 bg-slate-50/10">
+                    <!-- 스크립트에서 동적 로드 -->
+                </div>
+                <!-- 편집모드 전용: 항목 추가 영역 -->
+                <div id="add-container-SS" class="p-2 border-t border-slate-100 bg-slate-50/50 hidden shrink-0">
+                    <button onclick="addNewTask('SS')" class="w-full py-1.5 bg-blue-50 hover:bg-blue-100 border border-dashed border-blue-300 text-blue-700 font-bold rounded-lg text-[11px] transition-all flex items-center justify-center gap-1">
+                        <i data-lucide="plus" class="w-3.5 h-3.5"></i> 새 업무 항목 추가
+                    </button>
+                </div>
+            </div>
+
+            <!-- SE반 -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-150 overflow-hidden flex flex-col min-h-0">
+                <div class="p-3 border-b border-slate-100 bg-gradient-to-r from-emerald-50/40 to-indigo-50/5 flex justify-between items-center shrink-0">
+                    <h2 class="font-extrabold text-slate-800 text-sm flex items-center gap-1.5">
+                        <span class="w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center text-[11px] font-black">SE</span>
+                        SE반 체크리스트
+                    </h2>
+                    <span id="progress-badge-SE" class="bg-emerald-50 text-emerald-700 text-[10px] font-black px-2 py-0.5 rounded-full">0% 완료 (0/4)</span>
+                </div>
+                <div id="checklist-SE" class="p-2.5 flex-1 overflow-y-auto space-y-2 bg-slate-50/10">
+                    <!-- 스크립트에서 동적 로드 -->
+                </div>
+                <div id="add-container-SE" class="p-2 border-t border-slate-100 bg-slate-50/50 hidden shrink-0">
+                    <button onclick="addNewTask('SE')" class="w-full py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-dashed border-emerald-300 text-emerald-700 font-bold rounded-lg text-[11px] transition-all flex items-center justify-center gap-1">
+                        <i data-lucide="plus" class="w-3.5 h-3.5"></i> 새 업무 항목 추가
+                    </button>
+                </div>
+            </div>
+
+            <!-- ST반 -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-150 overflow-hidden flex flex-col min-h-0">
+                <div class="p-3 border-b border-slate-100 bg-gradient-to-r from-purple-50/40 to-indigo-50/5 flex justify-between items-center shrink-0">
+                    <h2 class="font-extrabold text-slate-800 text-sm flex items-center gap-1.5">
+                        <span class="w-6 h-6 rounded-lg bg-purple-600 text-white flex items-center justify-center text-[11px] font-black">ST</span>
+                        ST반 체크리스트
+                    </h2>
+                    <span id="progress-badge-ST" class="bg-purple-50 text-purple-700 text-[10px] font-black px-2 py-0.5 rounded-full">0% 완료 (0/4)</span>
+                </div>
+                <div id="checklist-ST" class="p-2.5 flex-1 overflow-y-auto space-y-2 bg-slate-50/10">
+                    <!-- 스크립트에서 동적 로드 -->
+                </div>
+                <div id="add-container-ST" class="p-2 border-t border-slate-100 bg-slate-50/50 hidden shrink-0">
+                    <button onclick="addNewTask('ST')" class="w-full py-1.5 bg-purple-50 hover:bg-purple-100 border border-dashed border-purple-300 text-purple-700 font-bold rounded-lg text-[11px] transition-all flex items-center justify-center gap-1">
+                        <i data-lucide="plus" class="w-3.5 h-3.5"></i> 새 업무 항목 추가
+                    </button>
+                </div>
+            </div>
+
+            <!-- SM반 -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-150 overflow-hidden flex flex-col min-h-0">
+                <div class="p-3 border-b border-slate-100 bg-gradient-to-r from-orange-50/40 to-indigo-50/5 flex justify-between items-center shrink-0">
+                    <h2 class="font-extrabold text-slate-800 text-sm flex items-center gap-1.5">
+                        <span class="w-8 w-6 h-6 rounded-lg bg-orange-600 text-white flex items-center justify-center text-[11px] font-black">SM</span>
+                        SM반 체크리스트
+                    </h2>
+                    <span id="progress-badge-SM" class="bg-orange-50 text-orange-700 text-[10px] font-black px-2 py-0.5 rounded-full">0% 완료 (0/4)</span>
+                </div>
+                <div id="checklist-SM" class="p-2.5 flex-1 overflow-y-auto space-y-2 bg-slate-50/10">
+                    <!-- 스크립트에서 동적 로드 -->
+                </div>
+                <div id="add-container-SM" class="p-2 border-t border-slate-100 bg-slate-50/50 hidden shrink-0">
+                    <button onclick="addNewTask('SM')" class="w-full py-1.5 bg-orange-50 hover:bg-orange-100 border border-dashed border-orange-300 text-orange-700 font-bold rounded-lg text-[11px] transition-all flex items-center justify-center gap-1">
+                        <i data-lucide="plus" class="w-3.5 h-3.5"></i> 새 업무 항목 추가
+                    </button>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- 여백을 줄인 슬림한 하단 안내 문안 -->
+        <footer class="text-center text-[10px] text-slate-400 py-1 shrink-0 flex items-center justify-center gap-2">
+            <span>※ 변경 즉시 자동 세이브 모드가 상시 작동 중입니다.</span>
+            <span class="text-slate-300">|</span>
+            <span>과거 날짜의 기록 역시 개별적으로 안전 보관 및 자동 분기 관리됩니다.</span>
+        </footer>
+    </div>
+
+    <script>
+        window.checklistApp = {
+            isCloudMode: false,
+            isEditMode: false,
+            selectedDate: "",
+            classes: ['SS', 'SE', 'ST', 'SM'],
+            // 반별 커스텀 체크리스트 구조를 유연하게 구성하기 위한 로컬 임시 캐시
+            classesData: {
+                SS: { date: "", classId: "SS", tasks: [], items: {} },
+                SE: { date: "", classId: "SE", tasks: [], items: {} },
+                ST: { date: "", classId: "ST", tasks: [], items: {} },
+                SM: { date: "", classId: "SM", tasks: [], items: {} }
+            },
+            // 최초 기동 또는 새 문서 생성 시 사용할 기준 데이터
+            defaultTasks: [
+                { id: 1, title: "1번 총원명부 상담파일 태블릿현황 일치", desc: "실제 현황 인원과 각 자료/장비의 전수 대조" },
+                { id: 2, title: "2번 생활상담일지", desc: "금일 진행된 지도 사항 및 면담 내용 기록 확인" },
+                { id: 3, title: "3번 병아리리스트", desc: "신규 입소생 및 개별 밀착 관리 대상자 명단 업데이트" },
+                { id: 4, title: "4번 B팀 태블릿 점검표 조치", desc: "테블릿 분실/고장 여부 점검 및 수리 필요 조치 기록" }
+            ],
+            showToast: function(message, type = 'info') {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                toast.className = `flex items-center gap-2 px-3 py-2 rounded-lg shadow-md border text-[11px] font-bold pointer-events-auto transform translate-y-1 opacity-0 transition-all duration-200 ${
+                    type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' :
+                    type === 'info' ? 'bg-blue-50 border-blue-200 text-blue-800' :
+                    'bg-slate-50 border-slate-200 text-slate-800'
+                }`;
+                
+                const icon = type === 'success' ? 'check-circle' : 'info';
+                toast.innerHTML = `<i data-lucide="${icon}" class="w-3.5 h-3.5 shrink-0"></i> <span>${message}</span>`;
+                container.appendChild(toast);
+                if (window.lucide) {
+                    lucide.createIcons();
+                }
+
+                setTimeout(() => {
+                    toast.classList.remove('translate-y-1', 'opacity-0');
+                }, 10);
+
+                setTimeout(() => {
+                    toast.classList.add('opacity-0', 'translate-y-1');
+                    setTimeout(() => toast.remove(), 250);
+                }, 2000);
+            }
+        };
+
+        // KST 오늘 날짜 구하기 (안전성 최우선)
+        function getKSTDateString() {
+            const d = new Date();
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        window.checklistApp.selectedDate = getKSTDateString();
+
+        function loadLocalData(dateStr) {
+            const key = `etoo_checklist_${dateStr}`;
+            const stored = localStorage.getItem(key);
+            if (stored) {
+                try {
+                    window.checklistApp.classesData = JSON.parse(stored);
+                    // 데이터 마이그레이션 (과거 저장소에 tasks 필드가 없는 구버전 처리)
+                    window.checklistApp.classes.forEach(classId => {
+                        if (!window.checklistApp.classesData[classId].tasks || window.checklistApp.classesData[classId].tasks.length === 0) {
+                            window.checklistApp.classesData[classId].tasks = JSON.parse(JSON.stringify(window.checklistApp.defaultTasks));
+                        }
+                    });
+                } catch (e) {
+                    initDefaultData(dateStr);
+                }
+            } else {
+                initDefaultData(dateStr);
+            }
+        }
+
+        function saveLocalData(dateStr) {
+            const key = `etoo_checklist_${dateStr}`;
+            localStorage.setItem(key, JSON.stringify(window.checklistApp.classesData));
+        }
+
+        function initDefaultData(dateStr) {
+            window.checklistApp.classes.forEach(classId => {
+                const items = {};
+                const tasksCopy = JSON.parse(JSON.stringify(window.checklistApp.defaultTasks));
+                tasksCopy.forEach(task => {
+                    items[`task_${task.id}`] = {
+                        id: task.id,
+                        checked: false,
+                        updatedAt: "",
+                        note: ""
+                    };
+                });
+                window.checklistApp.classesData[classId] = {
+                    date: dateStr,
+                    classId: classId,
+                    tasks: tasksCopy,
+                    items: items
+                };
+            });
+        }
+
+        function renderAllLists() {
+            window.checklistApp.classes.forEach(classId => {
+                const container = document.getElementById(`checklist-${classId}`);
+                if (!container) return;
+
+                container.innerHTML = "";
+                const data = window.checklistApp.classesData[classId];
+                if (!data || !data.tasks) return;
+
+                data.tasks.forEach(task => {
+                    const itemState = data.items[`task_${task.id}`] || { checked: false, note: "", updatedAt: "" };
+                    const themeColor = classId === 'SS' ? 'blue' : classId === 'SE' ? 'emerald' : classId === 'ST' ? 'purple' : 'orange';
+                    const taskEl = document.createElement('div');
+                    
+                    // 컴팩트함을 유지하기 위해 세로 크기를 최소화하는 마진/패딩 재설계
+                    taskEl.className = `p-2 bg-white rounded-lg border border-slate-200 shadow-sm transition-all relative ${
+                        itemState.checked ? `bg-${themeColor}-50/30 border-${themeColor}-200/50` : 'hover:bg-slate-50/50'
+                    }`;
+                    taskEl.id = `task-container-${classId}-${task.id}`;
+
+                    // 체크상태 시각 요소
+                    let checkMarkContent = '';
+                    if (itemState.checked) {
+                        checkMarkContent = `<span class="w-4 h-4 flex items-center justify-center rounded bg-${themeColor}-600 text-white"><i data-lucide="check" class="w-3 h-3 stroke-[3]"></i></span>`;
+                    } else {
+                        checkMarkContent = `<span class="w-4 h-4 flex items-center justify-center rounded border border-slate-300 bg-white group-hover:border-slate-400"></span>`;
+                    }
+
+                    // 편집모드일 때 제거 아이콘 노출
+                    const deleteBtnHtml = window.checklistApp.isEditMode 
+                        ? `<button onclick="deleteTask('${classId}', ${task.id})" class="p-1 hover:bg-rose-50 text-rose-500 rounded transition-all shrink-0 ml-1" title="항목 삭제">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                           </button>`
+                        : '';
+
+                    // 편집모드일 때는 타이틀과 설명을 입력 상자로 변경
+                    const titleContent = window.checklistApp.isEditMode
+                        ? `<div class="flex flex-col gap-1 w-full">
+                            <input type="text" value="${task.title}" onchange="updateTaskMetadata('${classId}', ${task.id}, 'title', this.value)" class="text-[11px] font-bold text-slate-800 bg-slate-50 hover:bg-slate-100 focus:bg-white focus:outline-none border border-slate-200 px-1 py-0.5 rounded w-full">
+                            <input type="text" value="${task.desc}" onchange="updateTaskMetadata('${classId}', ${task.id}, 'desc', this.value)" class="text-[10px] text-slate-400 bg-slate-50 hover:bg-slate-100 focus:bg-white focus:outline-none border border-slate-200 px-1 py-0.5 rounded w-full">
+                           </div>`
+                        : `<div class="flex-1 min-w-0" onclick="toggleTaskCheck('${classId}', ${task.id})">
+                            <div class="flex items-center justify-between gap-1">
+                                <h4 class="task-title truncate ${itemState.checked ? 'line-through text-slate-400' : ''}" style="font-size:var(--task-font-size);font-family:var(--task-font-family);font-weight:var(--task-font-weight);color:#0f172a;">${task.title}</h4>
+                                <span class="text-[9px] text-slate-400 font-bold shrink-0">${itemState.updatedAt ? new Date(itemState.updatedAt).toLocaleTimeString('ko-KR', {hour: '2-digit', minute:'2-digit'}) : ''}</span>
+                            </div>
+                            <p class="task-desc truncate mt-0.5" style="font-size:var(--task-desc-size);font-family:var(--task-font-family);color:#475569;">${task.desc}</p>
+                           </div>`;
+
+                    taskEl.innerHTML = `
+                        <div class="flex flex-col gap-1.5">
+                            <div class="flex items-start gap-2 justify-between">
+                                <div class="flex items-start gap-2 flex-1 min-w-0">
+                                    <div class="mt-0.5 shrink-0 cursor-pointer select-none group" onclick="toggleTaskCheck('${classId}', ${task.id})">
+                                        ${checkMarkContent}
+                                    </div>
+                                    ${titleContent}
+                                </div>
+                                ${deleteBtnHtml}
+                            </div>
+                            <!-- 메모 작성창 구조 -->
+                            <div class="relative flex items-center bg-slate-100/60 hover:bg-slate-100/90 rounded px-1.5 py-0.5 transition-all border border-slate-200/40">
+                                <i data-lucide="edit-3" class="w-3 h-3 text-slate-400 mr-1 shrink-0"></i>
+                                <input 
+                                    type="text" 
+                                    placeholder="조치내역 기재..." 
+                                    value="${itemState.note || ''}" 
+                                    onchange="updateTaskNote('${classId}', ${task.id}, this.value)"
+                                    class="w-full bg-transparent text-[10px] text-slate-700 placeholder-slate-400 focus:outline-none"
+                                >
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(taskEl);
+                });
+            });
+
+            updateProgressDashboard();
+
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        }
+
+        function updateProgressDashboard() {
+            let totalChecked = 0;
+            let totalTasksCount = 0;
+
+            window.checklistApp.classes.forEach(classId => {
+                const data = window.checklistApp.classesData[classId];
+                if (!data || !data.tasks) return;
+                
+                let checkedCount = 0;
+                const classTotal = data.tasks.length;
+                totalTasksCount += classTotal;
+
+                data.tasks.forEach(task => {
+                    const itemState = data.items[`task_${task.id}`];
+                    if (itemState && itemState.checked) {
+                        checkedCount++;
+                        totalChecked++;
+                    }
+                });
+
+                // 각 반 배지 갱신
+                const percent = classTotal > 0 ? Math.round((checkedCount / classTotal) * 100) : 0;
+                const badge = document.getElementById(`progress-badge-${classId}`);
+                if (badge) {
+                    badge.innerText = `${percent}% (${checkedCount}/${classTotal})`;
+                    if (percent === 100) {
+                        badge.className = "bg-emerald-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm";
+                    } else {
+                        const themeBadge = classId === 'SS' ? 'bg-blue-100 text-blue-700' : classId === 'SE' ? 'bg-emerald-100 text-emerald-700' : classId === 'ST' ? 'bg-purple-100 text-purple-700' : 'bg-orange-100 text-orange-700';
+                        badge.className = `${themeBadge} text-[10px] font-bold px-2 py-0.5 rounded-full`;
+                    }
+                }
+            });
+
+            // 전역 상단 바 갱신
+            const totalProgressText = document.getElementById('total-progress-text');
+            const totalCompletedCount = document.getElementById('total-completed-count');
+            if (totalProgressText && totalCompletedCount) {
+                totalCompletedCount.innerText = `${totalChecked} / ${totalTasksCount}`;
+                const globalPercent = totalTasksCount > 0 ? Math.round((totalChecked / totalTasksCount) * 100) : 0;
+                totalProgressText.innerText = `${globalPercent}%`;
+            }
+        }
+
+        function toggleTaskCheck(classId, taskId) {
+            const data = window.checklistApp.classesData[classId];
+            if (!data) return;
+
+            if (!data.items[`task_${taskId}`]) {
+                data.items[`task_${taskId}`] = { id: taskId, checked: false, note: "", updatedAt: "" };
+            }
+
+            const currentState = data.items[`task_${taskId}`];
+            currentState.checked = !currentState.checked;
+            currentState.updatedAt = currentState.checked ? new Date().toISOString() : "";
+
+            if (window.checklistApp.isCloudMode && window.cloudSyncDocument) {
+                window.cloudSyncDocument(classId);
+            } else {
+                saveLocalData(window.checklistApp.selectedDate);
+                renderAllLists();
+                window.checklistApp.showToast(`[${classId}반] 상태 변경 완료`, 'success');
+            }
+        }
+
+        // 조치 메모 변동 처리
+        function updateTaskNote(classId, taskId, value) {
+            const data = window.checklistApp.classesData[classId];
+            if (!data) return;
+
+            if (!data.items[`task_${taskId}`]) {
+                data.items[`task_${taskId}`] = { id: taskId, checked: false, note: "", updatedAt: "" };
+            }
+
+            data.items[`task_${taskId}`].note = value;
+
+            if (window.checklistApp.isCloudMode && window.cloudSyncDocument) {
+                window.cloudSyncDocument(classId);
+            } else {
+                saveLocalData(window.checklistApp.selectedDate);
+                updateProgressDashboard();
+                window.checklistApp.showToast(`[${classId}반] 조치내역이 저장되었습니다.`, 'info');
+            }
+        }
+
+        function updateTaskMetadata(classId, taskId, field, value) {
+            const data = window.checklistApp.classesData[classId];
+            if (!data || !data.tasks) return;
+
+            const task = data.tasks.find(t => t.id === taskId);
+            if (task) {
+                task[field] = value;
+                if (window.checklistApp.isCloudMode && window.cloudSyncDocument) {
+                    window.cloudSyncDocument(classId);
+                } else {
+                    saveLocalData(window.checklistApp.selectedDate);
+                    updateProgressDashboard();
+                }
+            }
+        }
+
+        // 신규 체크리스트 항목 즉각 추가
+        function addNewTask(classId) {
+            const data = window.checklistApp.classesData[classId];
+            if (!data) return;
+
+            const newId = Date.now(); // 고유 ID 부여
+            const newOrder = data.tasks.length + 1;
+            const newTask = {
+                id: newId,
+                title: `${newOrder}번 신규 체크사항`,
+                desc: "체크 항목에 대한 추가 설명을 입력하세요."
+            };
+
+            data.tasks.push(newTask);
+            data.items[`task_${newId}`] = {
+                id: newId,
+                checked: false,
+                note: "",
+                updatedAt: ""
+            };
+
+            if (window.checklistApp.isCloudMode && window.cloudSyncDocument) {
+                window.cloudSyncDocument(classId);
+            } else {
+                saveLocalData(window.checklistApp.selectedDate);
+                renderAllLists();
+                window.checklistApp.showToast(`[${classId}반] 새 체크 항목이 추가되었습니다.`, 'success');
+            }
+        }
+
+        // 특정 체크리스트 항목 즉시 파괴
+        function deleteTask(classId, taskId) {
+            const data = window.checklistApp.classesData[classId];
+            if (!data || !data.tasks) return;
+
+            data.tasks = data.tasks.filter(t => t.id !== taskId);
+            delete data.items[`task_${taskId}`];
+
+            if (window.checklistApp.isCloudMode && window.cloudSyncDocument) {
+                window.cloudSyncDocument(classId);
+            } else {
+                saveLocalData(window.checklistApp.selectedDate);
+                renderAllLists();
+                window.checklistApp.showToast(`[${classId}반] 항목이 정상적으로 삭제되었습니다.`, 'info');
+            }
+        }
+
+        const editBtn = document.getElementById('edit-mode-btn');
+        const editBtnText = document.getElementById('edit-mode-text');
+
+        editBtn.addEventListener('click', () => {
+            window.checklistApp.isEditMode = !window.checklistApp.isEditMode;
+            if (window.checklistApp.isEditMode) {
+                editBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-indigo-300 bg-indigo-50 text-indigo-800 font-extrabold transition-all shadow-sm";
+                editBtnText.innerText = "💾 편집 완료 / 뷰어로 전환";
+                // 반별 항목 추가 버튼 일괄 강제 노출
+                window.checklistApp.classes.forEach(classId => {
+                    document.getElementById(`add-container-${classId}`).classList.remove('hidden');
+                    if(designPanel) designPanel.classList.remove('hidden');
+                });
+            } else {
+                editBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 hover:border-indigo-300 bg-white hover:bg-indigo-50/50 text-slate-700 font-bold transition-all shadow-sm";
+                editBtnText.innerText = "🛠️ 설정/편집 모드";
+                window.checklistApp.classes.forEach(classId => {
+                    document.getElementById(`add-container-${classId}`).classList.add('hidden');
+                    if(designPanel) designPanel.classList.add('hidden');
+                });
+            }
+            applyDesignSettings();
+            renderAllLists();
+        });
+
+        // 디자인 설정
+        const designPanel = document.getElementById('design-panel');
+        const fs = document.getElementById('fontSizeRange');
+        const ds = document.getElementById('descSizeRange');
+        const ff = document.getElementById('fontFamilySelect');
+        const resetBtn = document.getElementById('resetDesign');
+
+        function applyDesignSettings(){
+            const fsv = localStorage.getItem('task-font-size') || '15';
+            const dsv = localStorage.getItem('task-desc-size') || '12';
+            const ffv = localStorage.getItem('task-font-family') || "'Pretendard', sans-serif";
+            document.documentElement.style.setProperty('--task-font-size', fsv+'px');
+            document.documentElement.style.setProperty('--task-desc-size', dsv+'px');
+            document.documentElement.style.setProperty('--task-font-family', ffv);
+            if(fs) fs.value=fsv;
+            if(ds) ds.value=dsv;
+            if(ff) ff.value=ffv;
+        }
+
+        fs?.addEventListener('input',e=>{
+            localStorage.setItem('task-font-size',e.target.value);
+            applyDesignSettings();
+        });
+        ds?.addEventListener('input',e=>{
+            localStorage.setItem('task-desc-size',e.target.value);
+            applyDesignSettings();
+        });
+        ff?.addEventListener('change',e=>{
+            localStorage.setItem('task-font-family',e.target.value);
+            applyDesignSettings();
+        });
+        resetBtn?.addEventListener('click',()=>{
+            localStorage.setItem('task-font-size','15');
+            localStorage.setItem('task-desc-size','12');
+            localStorage.setItem('task-font-family',"'Pretendard', sans-serif");
+            applyDesignSettings();
+        });
+
+
+        // 타이틀 실시간 편집 대응 (로컬 캐시 반영)
+        const mainTitleInput = document.getElementById('main-title');
+        const subDescInput = document.getElementById('sub-desc');
+
+        // 로컬에 타이틀 별도 백업 보관
+        if (localStorage.getItem('etoo_main_title')) {
+            mainTitleInput.value = localStorage.getItem('etoo_main_title');
+        }
+        if (localStorage.getItem('etoo_sub_desc')) {
+            subDescInput.value = localStorage.getItem('etoo_sub_desc');
+        }
+
+        mainTitleInput.addEventListener('change', (e) => {
+            localStorage.setItem('etoo_main_title', e.target.value);
+            window.checklistApp.showToast('메인 대타이틀 문구가 저장되었습니다.', 'info');
+        });
+        subDescInput.addEventListener('change', (e) => {
+            localStorage.setItem('etoo_sub_desc', e.target.value);
+            window.checklistApp.showToast('설명 문구가 저장되었습니다.', 'info');
+        });
+
+        // 날짜 선택 제어 바인딩
+        const targetDateInput = document.getElementById('target-date');
+        const prevDateBtn = document.getElementById('prev-date-btn');
+        const nextDateBtn = document.getElementById('next-date-btn');
+
+        targetDateInput.value = window.checklistApp.selectedDate;
+
+        function changeDate(newDateStr) {
+            window.checklistApp.selectedDate = newDateStr;
+            targetDateInput.value = newDateStr;
+            
+            if (window.checklistApp.isCloudMode && window.startCloudSubscription) {
+                window.startCloudSubscription(newDateStr);
+            } else {
+                loadLocalData(newDateStr);
+                renderAllLists();
+            }
+        }
+
+        targetDateInput.addEventListener('change', (e) => {
+            changeDate(e.target.value);
+        });
+
+        prevDateBtn.addEventListener('click', () => {
+            const current = new Date(window.checklistApp.selectedDate);
+            current.setDate(current.getDate() - 1);
+            changeDate(current.toISOString().split('T')[0]);
+        });
+
+        nextDateBtn.addEventListener('click', () => {
+            const current = new Date(window.checklistApp.selectedDate);
+            current.setDate(current.getDate() + 1);
+            changeDate(current.toISOString().split('T')[0]);
+        });
+
+        // 초기 구동 활성화
+        window.addEventListener('DOMContentLoaded', () => {
+            const badge = document.getElementById('mode-badge');
+            badge.innerText = "단독 오프라인 자동기록 모드";
+            badge.className = "text-[10px] font-black px-2 py-0.5 rounded bg-amber-100 text-amber-700 shrink-0";
+            
+            loadLocalData(window.checklistApp.selectedDate);
+            applyDesignSettings();
+            renderAllLists();
+        });
+    </script>
+
+    <!-- CORS가 차단된 로컬 다운로드 파일 실행 시 안전하게 Bypass 처리되도록 정밀 설계 -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        let firebaseConfig = null;
+        try {
+            if (typeof __firebase_config !== 'undefined') {
+                firebaseConfig = JSON.parse(__firebase_config);
+            }
+        } catch (e) {
+            console.warn("로컬 환경 실행으로 인해 실시간 동기화 모듈이 대기 상태로 전환되었습니다.");
+        }
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'shared-daily-checklist';
+
+        if (firebaseConfig) {
+            try {
+                const app = initializeApp(firebaseConfig);
+                const auth = getAuth(app);
+                const db = getFirestore(app);
+                let cloudUser = null;
+                const activeUnsubscribes = {};
+
+                // 익명인증 프로세스 수행 (RULE 3 준수)
+                const startAuth = async () => {
+                    try {
+                        await signInAnonymously(auth);
+                    } catch (e) {
+                        console.error("클라우드 인증 오류:", e);
+                    }
+                };
+
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        cloudUser = user;
+                        window.checklistApp.isCloudMode = true;
+                        
+                        const badge = document.getElementById('mode-badge');
+                        badge.innerText = "실시간 서버 클라우드 연동중";
+                        badge.className = "text-[10px] font-black px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 shrink-0";
+                        
+                        window.startCloudSubscription(window.checklistApp.selectedDate);
+                    }
+                });
+
+                // 실시간 Firestore 단방향/양방향 결합 구독
+                window.startCloudSubscription = function(dateStr) {
+                    if (!cloudUser) return;
+
+                    window.checklistApp.classes.forEach(classId => {
+                        if (activeUnsubscribes[classId]) {
+                            activeUnsubscribes[classId]();
+                        }
+                    });
+
+                    window.checklistApp.classes.forEach(classId => {
+                        const documentId = `${dateStr}_${classId}`;
+                        // RULE 1 허용 정밀 경로 매핑
+                        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'daily_checklists', documentId);
+
+                        activeUnsubscribes[classId] = onSnapshot(docRef, (docSnap) => {
+                            if (docSnap.exists()) {
+                                window.checklistApp.classesData[classId] = docSnap.data();
+                            } else {
+                                // 존재하지 않을 시 신규 템플릿 생성 및 다이렉트 푸시
+                                const items = {};
+                                const tasksCopy = JSON.parse(JSON.stringify(window.checklistApp.defaultTasks));
+                                tasksCopy.forEach(task => {
+                                    items[`task_${task.id}`] = {
+                                        id: task.id,
+                                        checked: false,
+                                        updatedAt: "",
+                                        note: ""
+                                    };
+                                });
+                                const defaultDoc = {
+                                    date: dateStr,
+                                    classId: classId,
+                                    tasks: tasksCopy,
+                                    items: items,
+                                    lastGlobalUpdate: new Date().toISOString()
+                                };
+                                window.checklistApp.classesData[classId] = defaultDoc;
+                                setDoc(docRef, defaultDoc);
+                            }
+                            renderAllLists();
+                        }, (err) => {
+                            console.error(`${classId}반 Firestore 통신 오류:`, err);
+                        });
+                    });
+                };
+
+                // 클라우드 업로드 전용 동기화 게이트웨이
+                window.cloudSyncDocument = async function(classId) {
+                    if (!cloudUser) return;
+                    const documentId = `${window.checklistApp.selectedDate}_${classId}`;
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'daily_checklists', documentId);
+                    
+                    try {
+                        const dataToUpload = JSON.parse(JSON.stringify(window.checklistApp.classesData[classId]));
+                        dataToUpload.lastGlobalUpdate = new Date().toISOString();
+                        await setDoc(docRef, dataToUpload);
+                        document.getElementById('status-quick-msg').innerText = "클라우드 세이브 완료";
+                    } catch (e) {
+                        console.error("클라우드 세이브 실패:", e);
+                    }
+                };
+
+                startAuth();
+            } catch (err) {
+                console.error("클라우드 연동 초기화 에러 발생. 오프라인 모드로 안전 폴백되었습니다.");
+            }
+        }
+    </script>
+</body>
+</html>
